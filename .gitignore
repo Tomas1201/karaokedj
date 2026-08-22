@@ -8,7 +8,7 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
 
 # IDE
 .idea/
@@ -26,11 +26,13 @@ buildNumber.properties
 # OS
 .DS_Store
 Thumbs.db
+*.DS_Store
 
 # Java
 *.class
 *.jar
 *.war
 *.ear
+*.log
 hs_err_pid*
 replay_pid*
