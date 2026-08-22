@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefWidth="1000" prefHeight="700"
+            style="-fx-background-color: #1e1e2e;">
+
+    <!-- TOP: Header -->
+    <top>
+        <HBox style="-fx-background-color: #181825; -fx-padding: 10 20;"
+              spacing="15" alignment="CENTER_LEFT">
+            <Label text="Karaokedj" style="-fx-text-fill: #cdd6f4; -fx-font-size: 22; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnOpenFile" text="Abrir Archivo" onAction="#onOpenFile"
+                    style="-fx-background-color: #89b4fa; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;"/>
+            <Button fx:id="btnOpenFolder" text="Abrir Carpeta" onAction="#onOpenFolder"
+                    style="-fx-background-color: #a6e3a1; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6;"/>
+        </HBox>
+    </top>
+
+    <!-- LEFT: Song List -->
+    <left>
+        <VBox prefWidth="280" style="-fx-background-color: #11111b; -fx-padding: 10;" spacing="8">
+            <Label text="Canciones" style="-fx-text-fill: #cdd6f4; -fx-font-size: 14; -fx-font-weight: bold;"/>
+            <ListView fx:id="songList"
+                      VBox.vgrow="ALWAYS"
+                      style="-fx-background-color: #181825; -fx-control-inner-background: #181825;"/>
+        </VBox>
+    </left>
+
+    <!-- CENTER: Lyrics Display -->
+    <center>
+        <VBox style="-fx-padding: 15;" spacing="10">
+            <!-- Metadata Panel -->
+            <VBox style="-fx-background-color: #181825; -fx-padding: 12; -fx-background-radius: 8;" spacing="5">
+                <HBox spacing="20">
+                    <VBox spacing="3">
+                        <Label text="Titulo" style="-fx-text-fill: #a6adc8; -fx-font-size: 11;"/>
+                        <Label fx:id="lblTitle" text="--" style="-fx-text-fill: #cdd6f4; -fx-font-size: 16; -fx-font-weight: bold;"/>
+                    </VBox>
+                    <VBox spacing="3">
+                        <Label text="Artista" style="-fx-text-fill: #a6adc8; -fx-font-size: 11;"/>
+                        <Label fx:id="lblArtist" text="--" style="-fx-text-fill: #89b4fa; -fx-font-size: 14;"/>
+                    </VBox>
+                    <VBox spacing="3">
+                        <Label text="Album" style="-fx-text-fill: #a6adc8; -fx-font-size: 11;"/>
+                        <Label fx:id="lblAlbum" text="--" style="-fx-text-fill: #f9e2af; -fx-font-size: 14;"/>
+                    </VBox>
+                    <VBox spacing="3">
+                        <Label text="Duracion" style="-fx-text-fill: #a6adc8; -fx-font-size: 11;"/>
+                        <Label fx:id="lblDuration" text="--" style="-fx-text-fill: #cdd6f4; -fx-font-size: 14;"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Lyrics Content -->
+            <VBox VBox.vgrow="ALWAYS"
+                  style="-fx-background-color: #11111b; -fx-padding: 15; -fx-background-radius: 8;">
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 0 0 8 0;">
+                    <Label fx:id="lblLrcStatus" text="Letra no buscada"
+                           style="-fx-text-fill: #a6adc8; -fx-font-size: 12;"/>
+                    <ProgressBar fx:id="progressBar" prefWidth="180" visible="false" managed="false"
+                                 style="-fx-accent: #cba6f7;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="Idioma:" style="-fx-text-fill: #a6adc8; -fx-font-size: 12;"/>
+                    <ComboBox fx:id="cmbWhisperLanguage" prefWidth="180"
+                              style="-fx-background-color: #313244; -fx-text-fill: #cdd6f4; -fx-background-radius: 4;"/>
+                    <Label text="Separación:" style="-fx-text-fill: #a6adc8; -fx-font-size: 12;"/>
+                    <ComboBox fx:id="cmbSeparationModel" prefWidth="200"
+                              style="-fx-background-color: #313244; -fx-text-fill: #cdd6f4; -fx-background-radius: 4;"/>
+                    <Button fx:id="btnSearchLyrics" text="Buscar Letra" onAction="#onSearchLyrics"
+                            style="-fx-background-color: #cba6f7; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-padding: 6 14; -fx-background-radius: 4;"/>
+                    <Button fx:id="btnProcessAi" text="Procesar con IA" onAction="#onProcessAi"
+                            style="-fx-background-color: #f38ba8; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-padding: 6 14; -fx-background-radius: 4;"/>
+                    <Button fx:id="btnProcessVocal" text="Procesar Vocal WAV" onAction="#onProcessVocal"
+                            style="-fx-background-color: #fab387; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-padding: 6 14; -fx-background-radius: 4;"/>
+                    <Button fx:id="btnSaveLrc" text="Guardar .lrc" onAction="#onSaveLrc" disable="true"
+                            style="-fx-background-color: #f38ba8; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-padding: 6 14; -fx-background-radius: 4;"/>
+                </HBox>
+                <TextArea fx:id="txtLyrics"
+                          VBox.vgrow="ALWAYS"
+                          editable="false"
+                          wrapText="true"
+                          style="-fx-control-inner-background: #1e1e2e; -fx-text-fill: #cdd6f4; -fx-font-size: 14; -fx-font-family: 'Monospace';"/>
+            </VBox>
+        </VBox>
+    </center>
+
+    <!-- BOTTOM: Player Controls -->
+    <bottom>
+        <VBox style="-fx-background-color: #181825; -fx-padding: 10 20;" spacing="8">
+            <!-- Progress Bar -->
+            <HBox spacing="10" alignment="CENTER">
+                <Label fx:id="lblCurrentTime" text="00:00" style="-fx-text-fill: #a6adc8; -fx-font-size: 12; -fx-font-family: 'Monospace';"/>
+                <Slider fx:id="sliderProgress" HBox.hgrow="ALWAYS" min="0" max="100" value="0"
+                        style="-fx-padding: 0 5;"
+                        blockIncrement="1" majorTickUnit="10"/>
+                <Label fx:id="lblTotalTime" text="00:00" style="-fx-text-fill: #a6adc8; -fx-font-size: 12; -fx-font-family: 'Monospace';"/>
+            </HBox>
+
+            <!-- Controls -->
+            <HBox spacing="15" alignment="CENTER">
+                <Button fx:id="btnStop" text="Stop" onAction="#onStop"
+                        style="-fx-background-color: #45475a; -fx-text-fill: #cdd6f4; -fx-padding: 8 20; -fx-background-radius: 6;"/>
+                <Button fx:id="btnPlay" text="Play" onAction="#onPlay"
+                        style="-fx-background-color: #a6e3a1; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-padding: 8 25; -fx-background-radius: 6;"/>
+                <Button fx:id="btnPause" text="Pause" onAction="#onPause" disable="true"
+                        style="-fx-background-color: #f9e2af; -fx-text-fill: #1e1e2e; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 6;"/>
+
+                <Separator orientation="VERTICAL" prefHeight="25"/>
+
+                <Label text="Vol" style="-fx-text-fill: #a6adc8; -fx-font-size: 12;"/>
+                <Slider fx:id="sliderVolume" prefWidth="120" min="0" max="100" value="80"
+                        blockIncrement="5" majorTickUnit="25" showTickLabels="false"/>
+
+                <Separator orientation="VERTICAL" prefHeight="25"/>
+                <Label fx:id="lblHardware" text="CPU" style="-fx-text-fill: #f38ba8; -fx-font-size: 11; -fx-font-weight: bold;"/>
+
+                <Separator orientation="VERTICAL" prefHeight="25"/>
+
+                <Label fx:id="lblStatus" text="Listo" style="-fx-text-fill: #a6adc8; -fx-font-size: 11;"/>
+            </HBox>
+        </VBox>
+    </bottom>
+
+</BorderPane>
