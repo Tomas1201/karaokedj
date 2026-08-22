@@ -38,29 +38,56 @@ public final class MlOptions {
         String accelerator = "";
 
         if (GpuDetector.hasDedicatedGpu()) {
-            try {
-                EnumSet<OrtProvider> providers = OrtEnvironment.getEnvironment().getAvailableProviders();
-                
-                if (providers.contains(OrtProvider.CUDA)) {
+            EnumSet<OrtProvider> providers = OrtEnvironment.getEnvironment().getAvailableProviders();
+            
+            if (providers.contains(OrtProvider.CUDA)) {
+                try {
                     opts.addCUDA(0);
                     gpuEnabled = true;
                     accelerator = "NVIDIA CUDA";
-                } else if (providers.contains(OrtProvider.DIRECT_ML)) {
+                } catch (Exception e) {
+                    log.warn("CUDA detectado pero falló al cargar (¿faltan librerías CUDA/cuDNN?). Intentando DirectML...");
+                    opts.close();
+                    opts = new SessionOptions();
+                    opts.setOptimizationLevel(OptLevel.ALL_OPT);
+                    opts.setIntraOpNumThreads(ORT_THREADS);
+                    opts.setInterOpNumThreads(1);
+                }
+            }
+
+            if (!gpuEnabled && providers.contains(OrtProvider.DIRECT_ML)) {
+                try {
                     opts.addDirectML(0);
                     gpuEnabled = true;
                     accelerator = "DirectML";
-                } else if (providers.contains(OrtProvider.CORE_ML)) {
+                } catch (Exception e) {
+                    log.warn("DirectML detectado pero falló al cargar.");
+                    opts.close();
+                    opts = new SessionOptions();
+                    opts.setOptimizationLevel(OptLevel.ALL_OPT);
+                    opts.setIntraOpNumThreads(ORT_THREADS);
+                    opts.setInterOpNumThreads(1);
+                }
+            }
+
+            if (!gpuEnabled && providers.contains(OrtProvider.CORE_ML)) {
+                try {
                     opts.addCoreML();
                     gpuEnabled = true;
                     accelerator = "Apple CoreML";
-                } else {
-                    String msg = "⚠️ GPU dedicada detectada, pero sin proveedores compatibles en ONNX (Falta CUDA/DirectML/CoreML). Se usará la CPU.";
-                    log.warn(msg);
-                    System.out.println("\n[INFO IA] " + msg + "\n");
+                } catch (Exception e) {
+                    log.warn("CoreML detectado pero falló al cargar.");
+                    opts.close();
+                    opts = new SessionOptions();
+                    opts.setOptimizationLevel(OptLevel.ALL_OPT);
+                    opts.setIntraOpNumThreads(ORT_THREADS);
+                    opts.setInterOpNumThreads(1);
                 }
-            } catch (Exception e) {
-                String msg = "❌ Error al intentar habilitar la GPU. Fallback a la CPU. Error: " + e.getMessage();
-                log.error(msg, e);
+            }
+
+            if (!gpuEnabled) {
+                String msg = "❌ Error al intentar habilitar la GPU (faltan dependencias CUDA/DirectML nativas). Fallback a la CPU.";
+                log.warn(msg);
                 System.out.println("\n[INFO IA] " + msg + "\n");
             }
         } else {
@@ -85,10 +112,31 @@ public final class MlOptions {
                 String gpuName = GpuDetector.getGpuName();
                 if (gpuName == null || gpuName.isBlank()) gpuName = "GPU";
 
-                if (providers.contains(OrtProvider.CUDA)) return "GPU: " + gpuName + " (CUDA)";
-                if (providers.contains(OrtProvider.DIRECT_ML)) return "GPU: " + gpuName + " (DirectML)";
-                if (providers.contains(OrtProvider.CORE_ML)) return "GPU: Apple Silicon (CoreML)";
-                return "CPU (Sin proveedor ONNX compatible)";
+                if (providers.contains(OrtProvider.CUDA)) {
+                    try (SessionOptions testOpts = new SessionOptions()) {
+                        testOpts.addCUDA(0);
+                        return "GPU: " + gpuName + " (CUDA)";
+                    } catch (Exception e) {
+                        // ignore and fallback
+                    }
+                }
+                if (providers.contains(OrtProvider.DIRECT_ML)) {
+                    try (SessionOptions testOpts = new SessionOptions()) {
+                        testOpts.addDirectML(0);
+                        return "GPU: " + gpuName + " (DirectML)";
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
+                if (providers.contains(OrtProvider.CORE_ML)) {
+                    try (SessionOptions testOpts = new SessionOptions()) {
+                        testOpts.addCoreML();
+                        return "GPU: Apple Silicon (CoreML)";
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
+                return "CPU (Sin librerías CUDA/DirectML)";
             } catch (Exception e) {
                 return "CPU (Error en ONNX)";
             }
