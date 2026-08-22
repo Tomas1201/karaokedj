@@ -143,7 +143,7 @@
                 <dependency>
                     <groupId>com.microsoft.onnxruntime</groupId>
                     <artifactId>onnxruntime_gpu</artifactId>
-                    <version>1.21.1</version>
+                    <version>1.29.0</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -158,7 +158,7 @@
                 <dependency>
                     <groupId>com.microsoft.onnxruntime</groupId>
                     <artifactId>onnxruntime</artifactId>
-                    <version>1.21.1</version>
+                    <version>1.29.0</version>
                 </dependency>
             </dependencies>
         </profile>

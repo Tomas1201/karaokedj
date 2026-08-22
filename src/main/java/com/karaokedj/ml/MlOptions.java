@@ -46,7 +46,8 @@ public final class MlOptions {
                     gpuEnabled = true;
                     accelerator = "NVIDIA CUDA";
                 } catch (Exception e) {
-                    log.warn("CUDA detectado pero falló al cargar (¿faltan librerías CUDA/cuDNN?). Intentando DirectML...");
+                    log.warn("❌ Error CRÍTICO al inicializar CUDA: {}", e.getMessage());
+                    diagnoseCuda(e);
                     opts.close();
                     opts = new SessionOptions();
                     opts.setOptimizationLevel(OptLevel.ALL_OPT);
@@ -142,5 +143,40 @@ public final class MlOptions {
             }
         }
         return "CPU";
+    }
+
+    private static void diagnoseCuda(Exception e) {
+        log.warn("================== DIAGNÓSTICO DE CUDA ==================");
+        log.warn("El sistema reporta que faltan DLLs nativas de CUDA o cuDNN.");
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            String path = System.getenv("PATH");
+            log.warn("Longitud del PATH actual: {}", path != null ? path.length() : "NULL");
+            if (path != null) {
+                boolean hasCudaPath = path.toLowerCase().contains("cuda");
+                boolean hasCudnnPath = path.toLowerCase().contains("cudnn");
+                log.warn("- ¿El PATH contiene directorios de CUDA?: {}", hasCudaPath ? "SÍ" : "NO");
+                log.warn("- ¿El PATH contiene directorios de cuDNN?: {}", hasCudnnPath ? "SÍ" : "NO");
+                
+                if (!hasCudaPath || !hasCudnnPath) {
+                    log.warn("RECOMENDACIÓN: Verifica que instalaste CUDA 12.x y cuDNN 9.x y agregaste la carpeta 'bin' de ambos a las variables de entorno de Windows.");
+                }
+            }
+            
+            log.warn("Intentando cargar librerías clave manualmente para diagnosticar...");
+            tryLoadLibrary("cublas64_12", "CUDA 12");
+            tryLoadLibrary("cudnn64_9", "cuDNN 9");
+            tryLoadLibrary("cudnn_cnn_infer64_9", "cuDNN 9 Infer");
+        }
+        log.warn("=========================================================");
+    }
+
+    private static void tryLoadLibrary(String libName, String displayName) {
+        try {
+            System.loadLibrary(libName);
+            log.warn("[OK] {} ({}.dll) fue cargado correctamente.", displayName, libName);
+        } catch (Throwable t) {
+            log.warn("[ERROR] No se pudo encontrar {} ({}.dll): {}", displayName, libName, t.getMessage());
+        }
     }
 }
