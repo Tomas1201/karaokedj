@@ -196,6 +196,67 @@ public class ModelDownloadService {
         } catch (IOException ignored) {}
     }
 
+    // ============================================================
+    // Binario fpcalc (Chromaprint) para reconocimiento AcoustID
+    // ============================================================
+
+    private static final String FPCALC_VERSION = "1.6.1";
+    private static final String FPCALC_URL =
+            "https://github.com/acoustid/chromaprint/releases/download/v" + FPCALC_VERSION
+                    + "/chromaprint-fpcalc-" + FPCALC_VERSION + "-linux-x86_64.tar.gz";
+
+    /**
+     * Devuelve un comando ejecutable de fpcalc: el del PATH si existe, si no
+     * el binario auto-descargado en ~/.karaokedj/bin/. Descarga bajo demanda.
+     */
+    public String ensureFpcalc() throws IOException, InterruptedException {
+        if (commandWorks("fpcalc", "-version")) return "fpcalc";
+
+        Path binDir = modelsDir.getParent().resolve("bin");
+        Path local = binDir.resolve("fpcalc");
+        if (Files.exists(local)) return local.toString();
+
+        Files.createDirectories(binDir);
+        Path tarPath = binDir.resolve("fpcalc.tar.gz");
+        try {
+            log.info("Descargando fpcalc desde {}", FPCALC_URL);
+            downloadFile(URI.create(FPCALC_URL).toURL(), tarPath, null);
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    "tar", "xzf", tarPath.toString(),
+                    "-C", binDir.toString(), "--strip-components=1");
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            process.getInputStream().readAllBytes();
+            int exit = process.waitFor();
+            if (exit != 0) throw new IOException("extracción fpcalc falló (exit " + exit + ")");
+
+            if (!Files.exists(local)) {
+                // Algunos empaquetados no traen subcarpeta; buscar el ejecutable
+                try (var walk = Files.walk(binDir)) {
+                    Path found = walk.filter(p -> p.getFileName().toString().equals("fpcalc"))
+                            .findFirst().orElseThrow(() -> new IOException("fpcalc no encontrado tras extraer"));
+                    Files.move(found, local);
+                }
+            }
+            local.toFile().setExecutable(true);
+            log.info("fpcalc instalado en {}", local);
+            return local.toString();
+        } finally {
+            Files.deleteIfExists(tarPath);
+        }
+    }
+
+    private boolean commandWorks(String... cmd) {
+        try {
+            Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();
+            p.getInputStream().readAllBytes();
+            return p.waitFor() == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public interface ProgressCallback {
         void onProgress(long bytesDownloaded);
     }

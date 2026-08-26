@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Configuración compartida de sesiones ONNX.
@@ -17,13 +18,42 @@ import java.util.EnumSet;
  * - Sin patrones de memoria cacheados (las activaciones no se retienen entre corridas)
  * - Arena con estrategia kSameAsRequested (crece solo lo estrictamente pedido,
  *   en vez de reservar por bloques grandes que quedan retenidos)
+ *
+ * Parallelism: por defecto usa hasta la mitad de los processors disponibles (mínimo 2, máximo 8),
+ * overridable vía system property "-Dia.ort.threads=N". Esto aprovecha hardware multi-core
+ * sin saturar la máquina en sistemas con mucha RAM.
  */
 public final class MlOptions {
 
     private static final Logger log = LoggerFactory.getLogger(MlOptions.class);
 
-    /** Hilos intra-op moderados: buen throughput sin saturar la máquina. */
-    static final int ORT_THREADS = 2;
+    /** Número de threads intra-op de ONNX: dinámico por defecto, overridable via system prop. */
+    static final int ORT_THREADS;
+
+    static {
+        // Calcular basado en availableProcessors, con bounds [2..8]
+        int processors = Runtime.getRuntime().availableProcessors();
+        int calculated = Math.max(2, Math.min(processors, 8));
+
+        // Override via system property si se especifica
+        String prop = System.getProperty("ia.ort.threads");
+        if (prop != null && !prop.isBlank()) {
+            try {
+                int override = Integer.parseInt(prop);
+                if (override >= 1) {
+                    calculated = override;
+                    log.info("Override ORT_THREADS via system property: {}", override);
+                }
+            } catch (NumberFormatException ignored) {
+                // ignore invalid prop, use calculated
+            }
+        }
+
+        // Logging de diagnóstico
+        log.info("ORT_THREADS configurado en {} (processors disponibles: {}, rango [2..8])", 
+                 calculated, processors);
+        ORT_THREADS = calculated;
+    }
 
     private MlOptions() {
     }

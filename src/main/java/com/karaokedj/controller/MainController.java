@@ -10,6 +10,7 @@ import com.karaokedj.service.AudioSeparationModel;
 import com.karaokedj.service.LrcFileService;
 import com.karaokedj.service.MetadataService;
 import com.karaokedj.service.ProgressListener;
+import com.karaokedj.service.SongRecognitionService;
 import com.karaokedj.util.LrcTime;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -28,6 +29,9 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class MainController {
@@ -62,6 +66,9 @@ public class MainController {
     private MetadataService metadataService;
 
     @Autowired
+    private SongRecognitionService songRecognitionService;
+
+    @Autowired
     private LyricsSearchService lyricsSearchService;
 
     @Autowired
@@ -75,6 +82,7 @@ public class MainController {
 
     private final ObservableList<SongMetadata> songs = FXCollections.observableArrayList();
     private SongMetadata selectedSong;
+    private final Set<Path> recognitionAttempted = ConcurrentHashMap.newKeySet();
     private LrcLyrics currentLyrics;
 
     // ==== Estado del log de progreso ====
@@ -254,6 +262,79 @@ public class MainController {
 
         audioPlayerService.stop();
         updatePlayButtons(false);
+
+        // Intentar reconocimiento automático si la canción tiene metadatos débiles
+        maybeAutoRecognize(song);
+    }
+
+    /**
+     * Verifica si la canción seleccionada tiene metadatos débiles (artista vacío o título = nombre de archivo).
+     * Si sí, y aún no se intentó para este archivo y no hay tarea larga activa, lanza el reconocimiento.
+     */
+    private void maybeAutoRecognize(SongMetadata song) {
+        if (song == null) return;
+        if (!metadataService.hasWeakMetadata(song)) return;
+        if (!recognitionAttempted.add(song.getFilePath())) return; // ya intentado esta sesión
+        if (btnSearchLyrics.isDisable()) return; // tarea larga activa; esperar
+
+        // Verificar que haya cliente AcoustID configurado
+        if (songRecognitionService.getClientId() == null || songRecognitionService.getClientId().isBlank()) {
+            appendLog("Reconocimiento: clave AcoustID no configurada. Regístrate en acoustid.org y configura la clave.");
+            lblStatus.setText("Sin reconocimiento (clave faltante)");
+            return;
+        }
+
+        lblStatus.setText("Reconociendo canción...");
+        showProgressBarIndeterminate();
+
+        Task<Optional<SongRecognitionService.RecognitionResult>> task = new Task<>() {
+            @Override
+            protected Optional<SongRecognitionService.RecognitionResult> call() throws Exception {
+                return songRecognitionService.recognize(song.getFilePath());
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            finishProgressBar();
+            Optional<SongRecognitionService.RecognitionResult> optResult = task.getValue();
+            if (optResult.isPresent()) {
+                SongRecognitionService.RecognitionResult rr = optResult.get();
+                // Actualizar metadatos en memoria
+                selectedSong.setTitle(rr.title());
+                selectedSong.setArtist(rr.artist());
+                selectedSong.setAlbum(rr.album());
+                // Escribir tags al archivo
+                try {
+                    metadataService.writeTags(song.getFilePath(), rr.title(), rr.artist(), rr.album());
+                    appendLog("Tags escritas: " + rr.title() + " - " + rr.artist());
+                } catch (Exception e) {
+                    appendLog("No se pudieron escribir tags: " + e.getMessage());
+                }
+                // Actualizar labels de UI
+                lblTitle.setText(rr.title());
+                lblArtist.setText(rr.artist());
+                lblAlbum.setText(rr.album() != null ? rr.album() : "Sin álbum");
+                lblStatus.setText("Canción reconocida: " + rr.title() + " - " + rr.artist());
+                appendLog("Reconocida: " + rr.title() + " - " + rr.artist() + " (score: " + rr.score() + ")");
+                // Encadenar búsqueda de letra automáticamente
+                onSearchLyrics();
+            } else {
+                appendLog("No se pudo reconocer la canción; intenta con otro archivo o verifica la clave AcoustID.");
+                lblStatus.setText("Sin reconocimiento");
+            }
+        });
+
+        task.setOnFailed(event -> {
+            finishProgressBar();
+            Throwable ex = task.getException();
+            String msg = ex != null ? ex.getMessage() : "Error desconocido";
+            appendLog("Error en reconocimiento: " + msg);
+            lblStatus.setText("Error en reconocimiento");
+        });
+
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     // ============================================================

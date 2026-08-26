@@ -81,4 +81,27 @@ public class MetadataService {
         String ext = getFileExtension(filePath.getFileName().toString());
         return SUPPORTED_EXTENSIONS.contains(ext.toLowerCase());
     }
+
+    /** Devuelve true si el metadato se considera "débil" (artista vacío o título = nombre de archivo). */
+    public boolean hasWeakMetadata(SongMetadata m) {
+        if (m == null) return false;
+        String artist = m.getArtist();
+        boolean weakArtist = artist == null || artist.isBlank();
+        String title = m.getTitle();
+        String stem = removeExtension(m.getFilePath() != null ? m.getFilePath().getFileName().toString() : "");
+        boolean titleEqualsFile = title != null && title.equalsIgnoreCase(stem);
+        return weakArtist || titleEqualsFile;
+    }
+
+    /** Escribe los tags (TÍTULO, ARTISTA, ÁLBUM) al archivo de audio usando jaudiotagger. */
+    public void writeTags(Path file, String title, String artist, String album) throws Exception {
+        var af = AudioFileIO.read(file.toFile());
+        var tag = af.getTagOrCreateAndSetDefault();
+        tag.setField(FieldKey.TITLE, title != null && !title.isBlank() ? title : "Unknown Title");
+        tag.setField(FieldKey.ARTIST, artist != null && !artist.isBlank() ? artist : "Unknown Artist");
+        if (album != null && !album.isBlank()) {
+            tag.setField(FieldKey.ALBUM, album);
+        }
+        af.commit();
+    }
 }
