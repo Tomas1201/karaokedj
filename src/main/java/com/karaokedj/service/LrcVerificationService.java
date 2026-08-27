@@ -4,23 +4,23 @@ import com.karaokedj.model.LrcLyrics;
 import com.karaokedj.model.WordTiming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service
 public class LrcVerificationService {
 
     private static final Logger log = LoggerFactory.getLogger(LrcVerificationService.class);
 
     private static final double MISMATCH_THRESHOLD = 0.20;
 
-    @Autowired
-    private LrcGeneratorService lrcGeneratorService;
+    private final LrcGeneratorService lrcGeneratorService;
+
+    public LrcVerificationService(LrcGeneratorService lrcGeneratorService) {
+        this.lrcGeneratorService = lrcGeneratorService;
+    }
 
     public String verifyAndCorrect(List<WordTiming> whisperWords, LrcLyrics apiLyrics) {
         if (apiLyrics == null || !apiLyrics.hasSyncedLyrics() && !apiLyrics.hasPlainLyrics()) {

@@ -3,15 +3,11 @@ package com.karaokedj.lyrics;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.karaokedj.model.LrcLyrics;
 import com.karaokedj.model.SongMetadata;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 /**
  * Proveedor Karalyr (www.karalyr.com/api): karaoke palabra-a-palabra.
  * Solo ofrece enhanced; no aporta referencia para la verificación IA.
  */
-@Component
-@Order(2)
 public class KaralyrProvider extends AbstractHttpProvider implements LyricsProvider {
 
     private static final String BASE_URL = "https://www.karalyr.com/api";

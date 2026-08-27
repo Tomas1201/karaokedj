@@ -2,7 +2,6 @@ package com.karaokedj.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +13,6 @@ import java.util.HexFormat;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Service
 public class ModelDownloadService {
 
     private static final Logger log = LoggerFactory.getLogger(ModelDownloadService.class);

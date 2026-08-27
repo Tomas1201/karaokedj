@@ -22,8 +22,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -33,7 +31,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
 public class MainController {
 
     private static final Logger log = LoggerFactory.getLogger(MainController.class);
@@ -62,23 +59,26 @@ public class MainController {
     @FXML private ComboBox<String> cmbSeparationModel;
     @FXML private ComboBox<String> cmbWhisperLanguage;
 
-    @Autowired
-    private MetadataService metadataService;
+    private final MetadataService metadataService;
+    private final SongRecognitionService songRecognitionService;
+    private final LyricsSearchService lyricsSearchService;
+    private final AiLyricsPipeline aiLyricsPipeline;
+    private final LrcFileService lrcFileService;
+    private final AudioPlayerService audioPlayerService;
 
-    @Autowired
-    private SongRecognitionService songRecognitionService;
-
-    @Autowired
-    private LyricsSearchService lyricsSearchService;
-
-    @Autowired
-    private AiLyricsPipeline aiLyricsPipeline;
-
-    @Autowired
-    private LrcFileService lrcFileService;
-
-    @Autowired
-    private AudioPlayerService audioPlayerService;
+    public MainController(MetadataService metadataService,
+                          SongRecognitionService songRecognitionService,
+                          LyricsSearchService lyricsSearchService,
+                          AiLyricsPipeline aiLyricsPipeline,
+                          LrcFileService lrcFileService,
+                          AudioPlayerService audioPlayerService) {
+        this.metadataService = metadataService;
+        this.songRecognitionService = songRecognitionService;
+        this.lyricsSearchService = lyricsSearchService;
+        this.aiLyricsPipeline = aiLyricsPipeline;
+        this.lrcFileService = lrcFileService;
+        this.audioPlayerService = audioPlayerService;
+    }
 
     private final ObservableList<SongMetadata> songs = FXCollections.observableArrayList();
     private SongMetadata selectedSong;

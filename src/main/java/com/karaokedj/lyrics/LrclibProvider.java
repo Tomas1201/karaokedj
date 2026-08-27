@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.karaokedj.model.LrcLyrics;
 import com.karaokedj.model.SongMetadata;
 import com.karaokedj.util.LrcTime;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +17,6 @@ import java.util.regex.Pattern;
  * de búsqueda (/api/search) + obtención por ID cuando el match exacto falla.
  * También aporta la mejor referencia (synced/plain) para la verificación IA.
  */
-@Component
-@Order(3)
 public class LrclibProvider extends AbstractHttpProvider implements LyricsProvider {
 
     private static final String BASE_URL = "https://lrclib.net/api";

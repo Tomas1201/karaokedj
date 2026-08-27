@@ -4,13 +4,11 @@ import com.karaokedj.model.WordTiming;
 import com.karaokedj.util.LrcTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Generación de archivos LRC / Enhanced LRC desde distintas fuentes de letras. */
-@Service
 public class LrcGeneratorService {
 
     private static final Logger log = LoggerFactory.getLogger(LrcGeneratorService.class);

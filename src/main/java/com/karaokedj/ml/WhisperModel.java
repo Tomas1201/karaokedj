@@ -5,7 +5,6 @@ import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.nio.FloatBuffer;
 import java.nio.LongBuffer;
@@ -20,7 +19,6 @@ import java.nio.file.Path;
  * Encapsula todo el conocimiento del modelo: nombres de tensores, tokens
  * especiales y manejo de caches KV autoregresivos.
  */
-@Service
 public class WhisperModel implements AutoCloseable {
 
     private static final Logger log = LoggerFactory.getLogger(WhisperModel.class);

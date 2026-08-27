@@ -3,8 +3,6 @@ package com.karaokedj.service;
 import com.karaokedj.model.StemSeparationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Service
 public class AudioProcessorService {
 
     private static final Logger log = LoggerFactory.getLogger(AudioProcessorService.class);

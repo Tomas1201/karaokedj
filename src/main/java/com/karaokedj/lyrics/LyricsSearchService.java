@@ -6,19 +6,16 @@ import com.karaokedj.model.SongMetadata;
 import com.karaokedj.service.AudioSeparationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
  * Orquesta la búsqueda de letras:
  *
- * 1. Karaoke palabra-a-palabra en cada proveedor (en orden @Order).
+ * 1. Karaoke palabra-a-palabra en cada proveedor (en orden provisto).
  * 2. Referencia (synced/plain) para verificación IA: LRCLIB primero, luego el resto.
  * 3. Si nada hay, pipeline IA (Demucs + Whisper) con la referencia encontrada.
  */
-@Service
 public class LyricsSearchService {
 
     private static final Logger log = LoggerFactory.getLogger(LyricsSearchService.class);
@@ -27,14 +24,10 @@ public class LyricsSearchService {
     private final LrclibProvider lrclibProvider;
     private final AiLyricsPipeline aiPipeline;
 
-    @Autowired
     public LyricsSearchService(List<LyricsProvider> providers,
                                LrclibProvider lrclibProvider,
                                AiLyricsPipeline aiPipeline) {
-        this.providers = providers.stream()
-                .sorted(java.util.Comparator.comparingInt(p ->
-                        p.getClass().getAnnotation(org.springframework.core.annotation.Order.class).value()))
-                .toList();
+        this.providers = List.copyOf(providers);
         this.lrclibProvider = lrclibProvider;
         this.aiPipeline = aiPipeline;
         log.info("Lyrics providers (orden): {}", this.providers.stream()

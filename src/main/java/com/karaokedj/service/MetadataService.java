@@ -7,13 +7,11 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Set;
 
-@Service
 public class MetadataService {
 
     private static final Logger log = LoggerFactory.getLogger(MetadataService.class);

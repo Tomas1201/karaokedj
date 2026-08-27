@@ -4,13 +4,10 @@ import com.karaokedj.model.LrcLyrics;
 import com.karaokedj.model.SongMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@Service
 public class LrcFileService {
 
     private static final Logger log = LoggerFactory.getLogger(LrcFileService.class);

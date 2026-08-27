@@ -3,10 +3,8 @@ package com.karaokedj.service;
 import com.karaokedj.model.SongMetadata;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,7 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-@Service
 public class SongRecognitionService {
 
     private static final Logger log = LoggerFactory.getLogger(SongRecognitionService.class);
@@ -33,11 +30,15 @@ public class SongRecognitionService {
         return clientId;
     }
 
-    public SongRecognitionService(ModelDownloadService modelDownloadService) {
-        this.modelDownloadService = modelDownloadService;
+    public SongRecognitionService() {
+        this(new ModelDownloadService());
     }
 
-    @PostConstruct
+    public SongRecognitionService(ModelDownloadService modelDownloadService) {
+        this.modelDownloadService = modelDownloadService;
+        init();
+    }
+
     private void init() {
         // Resolver cliente: system prop > Preferences override > constante default
         String sys = System.getProperty("acoustid.client");

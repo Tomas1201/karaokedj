@@ -13,8 +13,6 @@ import com.karaokedj.service.StemSeparatorService;
 import com.karaokedj.service.TranscriptionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,7 +22,6 @@ import java.util.List;
  * Pipeline IA: Demucs (separar voz) + Whisper (transcribir) → Enhanced LRC verificado.
  * También el modo "vocal-only" cuando el usuario aporta un WAV de voz ya aislado.
  */
-@Service
 public class AiLyricsPipeline {
 
     private static final Logger log = LoggerFactory.getLogger(AiLyricsPipeline.class);
@@ -32,20 +29,23 @@ public class AiLyricsPipeline {
     private static final String SOURCE_AI = "IA (Demucs + Whisper)";
     private static final String SOURCE_VOCAL_ONLY = "Whisper (vocal directo)";
 
-    @Autowired
-    private StemSeparatorService stemSeparatorService;
+    private final StemSeparatorService stemSeparatorService;
+    private final TranscriptionService transcriptionService;
+    private final LrcVerificationService lrcVerificationService;
+    private final AudioProcessorService audioProcessorService;
+    private final ModelDownloadService modelDownloadService;
 
-    @Autowired
-    private TranscriptionService transcriptionService;
-
-    @Autowired
-    private LrcVerificationService lrcVerificationService;
-
-    @Autowired
-    private AudioProcessorService audioProcessorService;
-
-    @Autowired
-    private ModelDownloadService modelDownloadService;
+    public AiLyricsPipeline(StemSeparatorService stemSeparatorService,
+                            TranscriptionService transcriptionService,
+                            LrcVerificationService lrcVerificationService,
+                            AudioProcessorService audioProcessorService,
+                            ModelDownloadService modelDownloadService) {
+        this.stemSeparatorService = stemSeparatorService;
+        this.transcriptionService = transcriptionService;
+        this.lrcVerificationService = lrcVerificationService;
+        this.audioProcessorService = audioProcessorService;
+        this.modelDownloadService = modelDownloadService;
+    }
 
     /** Descarga el alineador CTC si falta; nunca interrumpe el pipeline. */
     private void ensureCtcAligner(ProgressListener progress,

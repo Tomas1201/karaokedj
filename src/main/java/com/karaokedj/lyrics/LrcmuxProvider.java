@@ -4,15 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.karaokedj.model.LrcLyrics;
 import com.karaokedj.model.SongMetadata;
 import com.karaokedj.util.LrcTime;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 /**
  * Proveedor Lrcmux (api.lrcmux.dev): agrega KuGou/Musixmatch/NetEase/Genius.
  * Ofrece karaoke palabra-a-palabra y referencia por línea.
  */
-@Component
-@Order(1)
 public class LrcmuxProvider extends AbstractHttpProvider implements LyricsProvider {
 
     private static final String BASE_URL = "https://api.lrcmux.dev";

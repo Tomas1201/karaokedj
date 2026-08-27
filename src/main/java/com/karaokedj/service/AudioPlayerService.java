@@ -6,12 +6,9 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PreDestroy;
 import java.nio.file.Path;
 
-@Service
 public class AudioPlayerService {
 
     private static final Logger log = LoggerFactory.getLogger(AudioPlayerService.class);
@@ -129,7 +126,6 @@ public class AudioPlayerService {
         return currentFile;
     }
 
-    @PreDestroy
     public void cleanup() {
         stop();
     }

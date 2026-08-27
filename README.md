@@ -2,7 +2,6 @@
 
 [![Java](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
 [![JavaFX](https://img.shields.io/badge/JavaFX-25-blue.svg)](https://openjfx.io/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.7-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![ONNX Runtime](https://img.shields.io/badge/ONNX%20Runtime-1.29.0-yellow.svg)](https://onnxruntime.ai/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -217,8 +216,7 @@ karaokedj/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/karaokedj/
-│   │   │   ├── KaraokedjApplication.java # JavaFX Application entry point
-│   │   │   ├── SpringBootApp.java        # Spring Boot context initialization
+│   │   │   ├── KaraokedjApplication.java # JavaFX Application entry point & service wiring
 │   │   │   ├── audio/                    # Audio streaming, VAD, STFT/iSTFT, CTC alignment
 │   │   │   ├── controller/               # JavaFX UI controllers and cell factories
 │   │   │   ├── lyrics/                   # HTTP Providers (LRCLIB, Karalyr, Lrcmux) & AI Pipeline
@@ -227,9 +225,9 @@ karaokedj/
 │   │   │   ├── service/                  # Core services (Separation, Transcription, Verification, Player)
 │   │   │   └── util/                     # Timing and memory utilities
 │   │   └── resources/
-│   │       ├── application.properties    # App configuration & logging rules
-│   │       └── fxml/
-│   │           └── main_view.fxml        # JavaFX UI layout definition
+│   │       ├── fxml/
+│   │       │   └── main_view.fxml        # JavaFX UI layout definition
+│   │       └── log4j2.xml                # Logging configuration
 │   └── test/                             # Unit tests for audio, ML tensors, and services
 └── README.md                             # Project documentation
 ```

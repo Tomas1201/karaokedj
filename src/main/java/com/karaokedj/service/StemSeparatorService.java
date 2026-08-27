@@ -8,8 +8,6 @@ import com.karaokedj.model.StemSeparationResult;
 import com.karaokedj.util.MemoryMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,18 +17,20 @@ import java.nio.file.Path;
  * lee el WAV convertido por chunks, alimenta al modelo elegido y escribe
  * los stems incrementalmente — la canción completa nunca reside en RAM.
  */
-@Service
 public class StemSeparatorService {
 
     private static final Logger log = LoggerFactory.getLogger(StemSeparatorService.class);
 
     private static final int SAMPLE_RATE = 44100;
 
-    @Autowired
-    private ModelDownloadService modelDownloadService;
+    private final ModelDownloadService modelDownloadService;
+    private final AudioProcessorService audioProcessorService;
 
-    @Autowired
-    private AudioProcessorService audioProcessorService;
+    public StemSeparatorService(ModelDownloadService modelDownloadService,
+                                AudioProcessorService audioProcessorService) {
+        this.modelDownloadService = modelDownloadService;
+        this.audioProcessorService = audioProcessorService;
+    }
 
     public StemSeparationResult separate(Path audioFile, Path outputDir,
                                          ModelDownloadService.ProgressCallback progress,

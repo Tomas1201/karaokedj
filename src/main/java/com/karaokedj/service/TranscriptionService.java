@@ -15,8 +15,6 @@ import com.karaokedj.util.LrcTime;
 import com.karaokedj.util.MemoryMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,21 +26,23 @@ import java.util.List;
  * Orquesta: conversión de audio, descarga/validación del modelo, decodificación por chunks.
  * La inferencia ONNX vive en {@link WhisperModel}.
  */
-@Service
 public class TranscriptionService {
 
     private static final Logger log = LoggerFactory.getLogger(TranscriptionService.class);
 
     private static final int SAMPLE_RATE = MelSpectrogram.SAMPLE_RATE;
 
-    @Autowired
-    private ModelDownloadService modelDownloadService;
+    private final ModelDownloadService modelDownloadService;
+    private final AudioProcessorService audioProcessorService;
+    private final WhisperModel whisperModel;
 
-    @Autowired
-    private AudioProcessorService audioProcessorService;
-
-    @Autowired
-    private WhisperModel whisperModel;
+    public TranscriptionService(ModelDownloadService modelDownloadService,
+                                AudioProcessorService audioProcessorService,
+                                WhisperModel whisperModel) {
+        this.modelDownloadService = modelDownloadService;
+        this.audioProcessorService = audioProcessorService;
+        this.whisperModel = whisperModel;
+    }
 
     public List<WordTiming> transcribe(Path vocalWav, Path outputDir,
                                         ModelDownloadService.ProgressCallback progress,

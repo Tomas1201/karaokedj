@@ -11,18 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class LrcVerificationServiceTest {
 
     private final LrcGeneratorService lrcGeneratorService = new LrcGeneratorService();
-    private final LrcVerificationService service;
-
-    LrcVerificationServiceTest() {
-        this.service = new LrcVerificationService();
-        try {
-            var field = LrcVerificationService.class.getDeclaredField("lrcGeneratorService");
-            field.setAccessible(true);
-            field.set(service, lrcGeneratorService);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private final LrcVerificationService service = new LrcVerificationService(lrcGeneratorService);
 
     @Test
     void testVerifyWithMatchingWords() {
